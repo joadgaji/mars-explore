@@ -7,7 +7,7 @@ try:
         import pygame
         from pygame.locals import *
         import random
-        import thread
+        import threading
 
 
 except ImportError, err:
@@ -21,16 +21,57 @@ class Robot:
                 self.positiony = (mapaxy/12) *50
                 self.mapaxy = mapaxy
                 self.speed = 5
+                self.movimiento = 5
+                self.frame = 10
                 self.image = pygame.image.load('Resources/robot2.png').convert_alpha()
                 self.pos = self.image.get_rect().move(self.positionx, self.positiony)
-        def move(self, mov):
-                if mov == 1:
+
+        def move(self, mapa, mutex, *args):
+                while 1:
+                        for event in pygame.event.get():
+                                if event.type in (QUIT, KEYDOWN):
+                                        exit()
+
+                        rand = random.randint(1,4)
+                        posmapnew = 0
+                        mutex.acquire()
+                        if rand == 1:
+                                posmapnew = self.mapaxy - 12
+                        if rand == 2:
+                                posmapnew = self.mapaxy + 12
+                        if rand == 3:
+                                posmapnew = self.mapaxy + 1
+                                if ( posmapnew % 12 ) == 0:
+                                        posmapnew  = self.mapaxy
+                        if rand == 4:
+                                posmapnew = self.mapaxy - 1
+                                if ( posmapnew % 12 ) == 11:
+                                        posmapnew = self.mapaxy
+                                
+                        if posmapnew >= 0  and posmapnew < 120:
+                                if not(mapa.has_key(posmapnew)):
+                                        mapa[posmapnew] = 'robot'
+                                        del mapa[self.mapaxy]
+                                        self.mapaxy = posmapnew
+                                else:
+                                        rand = 5
+                        else:
+                                rand = 5
+                        mutex.release()
+                        self.movimiento = rand
+
+                        for i in range(self.frame):
+                                self.movimientos()
+                                pygame.time.delay(20)
+
+        def movimientos(self):
+                if self.movimiento == 1:
                         self.moveup()
-                elif mov == 2:
+                elif self.movimiento == 2:
                         self.movedown()
-                elif mov == 3:
+                elif self.movimiento == 3:
                         self.moveright()
-                elif mov == 4:
+                elif self.movimiento == 4:
                         self.moveleft()
                 
                 
