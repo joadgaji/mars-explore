@@ -10,6 +10,8 @@ try:
         import threading
         import thread
         from Robot import *
+        from Obstaculo import *
+        from Nave import *
 
 
 except ImportError, err:
@@ -23,12 +25,27 @@ screen = pygame.display.set_mode((600,600))
 background = pygame.image.load('Resources/mars2.gif').convert()
 screen.blit(background, (0, 0))
 robots = []
+obstaculos = []
 mapa = {}
 rand = random.randint(0,120)
 mutex = threading.Lock()
 
+nave = Nave(rand)
+mapa[rand] = 'nave'
+
 for x in range(5):
         rand = random.randint(0,120)
+        while mapa.has_key(rand):
+              rand = random.randint(0,120)
+        obs = Obstaculo(rand)
+        mapa[rand] = 'obstaculo'
+        obstaculos.append(obs)
+        print rand
+        
+for x in range(5):
+        rand = random.randint(0,120)
+        while mapa.has_key(rand):
+              rand = random.randint(0,120)
         o = Robot(rand)
         mapa[rand] = 'robot'
         robots.append(o)
@@ -43,6 +60,9 @@ while 1:
                         exit()
 
         screen.blit(background, (0,0))
+        screen.blit(nave.image, nave.pos)
+        for o in obstaculos:
+                screen.blit(o.image, o.pos)
         for o in robots: 
                  screen.blit(o.image, o.pos)
         pygame.display.update()
