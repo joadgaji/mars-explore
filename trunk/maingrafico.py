@@ -56,8 +56,10 @@ for o in robots:
         
 while 1:
         for event in pygame.event.get():
-                if event.type in (QUIT, KEYDOWN):
-                        exit()
+                if event.type == QUIT:
+                        for o in robots:
+                                o.seguir = False
+                        pygame.quit()
 
         screen.blit(background, (0,0))
         screen.blit(nave.image, nave.pos)

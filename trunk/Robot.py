@@ -23,11 +23,12 @@ class Robot:
                 self.speed = 5
                 self.movimiento = 5
                 self.frame = 10
+                self.seguir = True
                 self.image = pygame.image.load('Resources/robot2.png').convert_alpha()
                 self.pos = self.image.get_rect().move(self.positionx, self.positiony)
 
         def move(self, mapa, mutex, *args):
-                while 1:
+                while self.seguir:
                         for event in pygame.event.get():
                                 if event.type in (QUIT, KEYDOWN):
                                         exit()

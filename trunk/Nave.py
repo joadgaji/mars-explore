@@ -14,12 +14,12 @@ except ImportError, err:
         print "Import OK"
 
 class Nave:
-        def __init__(self, mapaxy):
-                self.positionx = (mapaxy%12) *50
-                self.positiony = (mapaxy/12) *50
-                self.mapaxy = mapaxy
+        def __init__(self, posx, posy):
+                self.posx = posx *50
+                self.posy = posy *50
+                self.mapaxy = posx * posy
                 self.image = pygame.image.load('Resources/nave.png').convert_alpha()
-                self.pos = self.image.get_rect().move(self.positionx, self.positiony)
+                self.pos = self.image.get_rect().move(self.posx, self.posy)
                 self.piedras = 0
                 
         def add_piedras(self, num):
@@ -27,3 +27,6 @@ class Nave:
 
         def get_position(self):
             return self.mapaxy
+
+        def mytype(self):
+                return "nave"
