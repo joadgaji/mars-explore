@@ -22,3 +22,6 @@ class Obstaculo:
 ##                self.frame = 10
                 self.image = pygame.image.load('Resources/roca.png').convert_alpha()
                 self.pos = self.image.get_rect().move(self.positionx, self.positiony)
+
+        def mytype(self):
+                return "obstaculo"

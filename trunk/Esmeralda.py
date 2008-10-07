@@ -16,7 +16,7 @@ except ImportError, err:
         print "Import OK"
 
 class Esmeralda:
-        def __init__(self, mapaxy, esmeraldas, surface):
+        def __init__(self, mapaxy, esmeraldas, fontesme):
                 self.positionx = (mapaxy%12)*50
                 self.positiony = (mapaxy/12) *50
                 self.mapaxy = mapaxy
@@ -24,13 +24,21 @@ class Esmeralda:
                 self.esmeraldas = esmeraldas
                 self.movimiento = 5
                 self.frame = 10
-                self.surface = surface
+                
+                self.fontesme = fontesme
+                self.surface = fontesme.render(str(self.esmeraldas), True, (200,200,50))
                 self.image = pygame.image.load('Resources/esmeralda.png').convert_alpha()
                 self.pos = self.image.get_rect().move(self.positionx, self.positiony)
-                self.postext = self.surface.get_rect().move(self.positionx +25 -(surface.get_size()[0]/ 2), self.positiony + 25 - (surface.get_size()[1]/ 2))
+                self.postext = self.surface.get_rect().move(self.positionx +25 -(self.surface.get_size()[0]/ 2), self.positiony + 25 - (self.surface.get_size()[1]/ 2))
 
-        def quitarpiedra(self):
+        def quitarpiedra(self, mapa, mutex):
+                mutex.acquire()
                 self.esmeraldas = self.esmeraldas - 1
+                if(self.esmeraldas == 0):
+                        del mapa[self.mapaxy]
+                mutex.release()
+                self.surface = self.fontesme.render(str(self.esmeraldas), True, (200,200,50))
+                self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2), ((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
 
         def postext(self, surface):
                 size = surface.get_size()
