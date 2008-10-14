@@ -13,7 +13,7 @@ try:
         from Obstaculo import *
         from Nave import *
         from Esmeralda import *
-       ## from GeneradorDeObs import *
+        from RobotMoronas import *
 
 
 except ImportError, err:
@@ -25,99 +25,114 @@ except ImportError, err:
 class maingrafico():
 
         def __init__(self, agentes, esme, orden, obs):
-                    self.agentes = agentes
-                    self.esme = esme
-                    self.orden = orden
-                    self.obs = obs
-                    print agentes, esme, orden,obs
+            self.agentes = agentes
+            self.esme = esme
+            self.orden = orden
+            self.obs = obs
+            print agentes, esme, orden,obs
+            self.moronas = True
 
-       
-                    pygame.init()
-                    screen = pygame.display.set_mode((600,600))
-                    background = pygame.image.load('Resources/mars2.gif').convert()
-                    cond = threading.Condition()
-                    screen.blit(background, (0, 0))
-                    robots = []
-                    obstaculos = []
-                    esmeraldas = []
-                    mapa = {}
+
+            pygame.init()
+            screen = pygame.display.set_mode((600,600))
+            background = pygame.image.load('Resources/mars2.gif').convert()
+            cond = threading.Condition()
+            screen.blit(background, (0, 0))
+            robots = []
+            obstaculos = []
+            esmeraldas = []
+            mapa = {}
+            rand = random.randint(0,120)
+            mutex = threading.Lock()
+            capas = orden
+            fontnave = pygame.font.SysFont("arial", 15, True);
+            posnave = rand
+            nave = Nave(posnave, fontnave)
+            mapa[posnave] = nave
+
+            moronas = {}
+            listaPos = self.generarObs(obs,mapa)
+
+            for i in listaPos:
+                    obs = Obstaculo(i)
+                    mapa[i] =  obs
+                    obstaculos.append(obs)
+
+                    
+            for x in range(self.agentes):
+                    
                     rand = random.randint(0,120)
-                    mutex = threading.Lock()
-                    capas = orden
-                    fontnave = pygame.font.SysFont("arial", 15, True);
-                    posnave = rand
-                    nave = Nave(posnave, fontnave)
-                    mapa[posnave] = nave
-
-
-                    listaPos = self.generarObs(obs,mapa)
-
-                    for i in listaPos:
-                            obs = Obstaculo(i)
-                            mapa[i] =  obs
-                            obstaculos.append(obs)
-
-                            
-                    for x in range(self.agentes):
-                            
+                    while mapa.has_key(rand):
                             rand = random.randint(0,120)
-                            while mapa.has_key(rand):
-                                    rand = random.randint(0,120)
-                                    
-                            randcap = random.randint(5,25)
-                            fontrob = pygame.font.SysFont("arial", 15, True);
-                            o = Robot(rand, randcap, fontrob, nave)
-                            mapa[rand] = o
-                            robots.append(o)
-                            print randcap
+                            
+                    randcap = random.randint(5,25)
+                    fontrob = pygame.font.SysFont("arial", 15, True);
+                    ###
+                    o = RobotMoronas(rand, randcap, fontrob, nave)
+                    mapa[rand] = o
+                    robots.append(o)
+                    print randcap
 
-                    listaEsme = []
-                    a = self.esme
-                    while a > 20:
-                        xrand = random.randint(3,20)
-                        listaEsme = listaEsme + [xrand]
-                        a = a - xrand     
-                    if a <= 20:
-                            listaEsme = listaEsme + [a]
-                            
-                    for x in listaEsme:
-                            
+            listaEsme = []
+            a = self.esme
+            while a > 20:
+                xrand = random.randint(3,20)
+                listaEsme = listaEsme + [xrand]
+                a = a - xrand     
+            if a <= 20:
+                    listaEsme = listaEsme + [a]
+                    
+            for x in listaEsme:
+                    
+                    rand = random.randint(1,120)
+                    while mapa.has_key(rand):
                             rand = random.randint(1,120)
-                            while mapa.has_key(rand):
-                                    rand = random.randint(1,120)
-                                    
-                            randp = x
-                            fontesme = pygame.font.SysFont("arial", 15, True);
-                            esme = Esmeralda(rand, randp, fontesme)
-                            mapa[rand] = esme
-                            esmeraldas.append(esme)
-
-                    for o in robots:
-                            thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex,))
                             
-                    while 1:
-                            for event in pygame.event.get():
-                                    if event.type == QUIT:
-                                            for o in robots:
-                                                    o.seguir = False
-                                            pygame.quit()
-                                            exit()
+                    randp = x
+                    fontesme = pygame.font.SysFont("arial", 15, True);
+                    esme = Esmeralda(rand, randp, fontesme)
+                    mapa[rand] = esme
+                    esmeraldas.append(esme)
 
-                            screen.blit(background, (0,0))
-                            screen.blit(nave.image, nave.pos)
-                            screen.blit(nave.surface, nave.postext)
-                            for o in obstaculos:
+            for o in robots:
+                    ###
+                    thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex, moronas,))
+                    
+            while 1:
+                    if nave.piedras == self.esme:
+                            for o in robots:
+                                    o.seguir = False
+                            pygame.quit()
+                            exit()
+                                    
+                    for event in pygame.event.get():
+                            if event.type == QUIT:
+                                    for o in robots:
+                                            o.seguir = False
+                                    pygame.quit()
+                                    exit()
+
+                    screen.blit(background, (0,0))
+                    screen.blit(nave.image, nave.pos)
+                    screen.blit(nave.surface, nave.postext)
+                    for o in moronas.keys():
+                            posmap = o
+                            imagemoro = pygame.image.load('Resources/morona.jpg').convert_alpha()
+                            posmoro = imagemoro.get_rect().move((posmap%12) *50,(posmap/12) *50)
+                            screen.blit(imagemoro, posmoro)
+                    for o in obstaculos:
+                            screen.blit(o.image, o.pos)
+                    for o in robots: 
+                             screen.blit(o.image, o.pos)
+                             screen.blit(o.surface, o.postext)
+                    for o in esmeraldas:
+                            if o.esmeraldas != 0:
                                     screen.blit(o.image, o.pos)
-                            for o in robots: 
-                                     screen.blit(o.image, o.pos)
-                                     screen.blit(o.surface, o.postext)
-                            for o in esmeraldas:
-                                    if o.esmeraldas != 0:
-                                            screen.blit(o.image, o.pos)
-                                            screen.blit(o.surface, o.postext)
-                            #cond.notifyAll()
-                            pygame.display.update()
-                    pygame.time.delay(30)
+                                    screen.blit(o.surface, o.postext)
+                 
+                    print moronas
+                    pygame.display.update()
+            pygame.time.delay(20)
             
         def generarObs(self,x,mapa):
                         opciones =[(0,0), (11,13), (11,12)]

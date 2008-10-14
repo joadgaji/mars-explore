@@ -32,14 +32,12 @@ class Esmeralda:
                 self.postext = self.surface.get_rect().move(self.positionx +25 -(self.surface.get_size()[0]/ 2), self.positiony + 25 - (self.surface.get_size()[1]/ 2))
 
         def quitarpiedra(self, mapa, mutex):
-                mutex.acquire()
                 self.esmeraldas = self.esmeraldas - 1
                 if(self.esmeraldas == 0):
                         del mapa[self.mapaxy]
                 
                 self.surface = self.fontesme.render(str(self.esmeraldas), True, (200,200,50))
                 self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2), ((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
-                mutex.release()
                 
         def postext(self, surface):
                 size = surface.get_size()
