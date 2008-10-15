@@ -123,7 +123,7 @@ class Robot:
 
 
         def descarga(self, mapa, mutex, posmapnew):
-                while self.cargadas != 0:
+                #while self.cargadas != 0:
                         self.cambiarnum(-1, mutex)
                         mapa[posmapnew].aumentap(mutex)
 
@@ -203,7 +203,7 @@ class Robot:
                                         rand = 3
                                         self.move(mapa, mutex, 3)
                                 elif movx == 0:
-                                        self.move(mapa, mutex, random.randint(1,4))
+                                        self.move(mapa, mutex, random.randint(3,4))
                         else:
                                 if movy > 0:
                                         rand = 2
@@ -212,7 +212,7 @@ class Robot:
                                         rand = 1
                                         self.move(mapa, mutex, 1)
                                 elif movy == 0:
-                                        self.move(mapa, mutex, random.randint(1,4))
+                                        self.move(mapa, mutex, random.randint(1,2))
                         self.obstaculo = False
 
                         

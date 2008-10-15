@@ -39,7 +39,8 @@ class RobotMoronas(Robot):
 
         self.dejarmoronas = False
         self.nummorona = 1
-
+        self.valuemorona = 0
+        
         self.fontrob = fontrob
         self.surface = self.fontrob.render(str(self.cargadas), True, (10,37,150))
         self.image = pygame.image.load('Resources/robot2.png').convert_alpha()
@@ -64,9 +65,9 @@ class RobotMoronas(Robot):
                                 if a == 3:
                                         if self.cargaesme(mapa, mutex):
                                                 break
-                                #if a == 4:
-                                        #if self.siguemorona(mapa, mutex, moronas):
-                                         #       break
+                                if a == 4:
+                                        if self.siguemoronas(mapa, mutex, moronas):
+                                                break
                                 if a == 5:
                                         if self.explorar(mapa, mutex):
                                                 break
@@ -104,7 +105,6 @@ class RobotMoronas(Robot):
                         self.dejamorona(moronas)
                         mutex.release()
                 entreacapa = True
-        
 
                 if not self.haynave(mapa, mutex):
                         ###
@@ -122,32 +122,33 @@ class RobotMoronas(Robot):
                                 elif movy < 0:
                                         rand = 1
                                         self.move(mapa, mutex, 1)
+                               # mutex.release()
         return entreacapa
 
-        def haynave(self, mapa, mutex):
-                estanave = False
-                for i in range(1,5):
-                        if i == 1:
-                                posmapnew = self.mapaxy - 12
-                        if i == 2:
-                                posmapnew = self.mapaxy + 12
-                        if i == 3:
-                                posmapnew = self.mapaxy + 1
-                                if ( posmapnew % 12 ) == 0:
-                                        posmapnew  = self.mapaxy
-                        if i == 4:
-                                posmapnew = self.mapaxy - 1
-                                if ( posmapnew % 12 ) == 11:
-                                        posmapnew = self.mapaxy
-                        mutex.acquire()
-                        if (mapa.has_key(posmapnew)):
-                                if mapa[posmapnew].mytype() == "soylanavepitoembocas":
-                                        estanave = True
-                                        self.dejarmoronas = False
-                                        self.nummorona = 1
-                                        self.descarga(mapa, mutex, posmapnew)
-                        mutex.release()
-                return estanave
+    def haynave(self, mapa, mutex):
+            estanave = False
+            for i in range(1,5):
+                    if i == 1:
+                            posmapnew = self.mapaxy - 12
+                    if i == 2:
+                            posmapnew = self.mapaxy + 12
+                    if i == 3:
+                            posmapnew = self.mapaxy + 1
+                            if ( posmapnew % 12 ) == 0:
+                                    posmapnew  = self.mapaxy
+                    if i == 4:
+                            posmapnew = self.mapaxy - 1
+                            if ( posmapnew % 12 ) == 11:
+                                    posmapnew = self.mapaxy
+                    mutex.acquire()
+                    if (mapa.has_key(posmapnew)):
+                            if mapa[posmapnew].mytype() == "soylanavepitoembocas":
+                                    estanave = True
+                                    self.dejarmoronas = False
+                                    self.nummorona = 1
+                                    self.descarga(mapa, mutex, posmapnew)
+                    mutex.release()
+            return estanave
 
     def evitarobs(self, mapa, mutex, moronas):
         if not(self.obstaculo):
@@ -175,7 +176,7 @@ class RobotMoronas(Robot):
                                 rand = 3
                                 self.move(mapa, mutex, 3)
                         elif movx == 0:
-                                self.move(mapa, mutex, random.randint(1,4))
+                                self.move(mapa, mutex, random.randint(3,4))
                 else:
                         if movy > 0:
                                 rand = 2
@@ -184,51 +185,64 @@ class RobotMoronas(Robot):
                                 rand = 1
                                 self.move(mapa, mutex, 1)
                         elif movy == 0:
-                                self.move(mapa, mutex, random.randint(1,4))
-                if self.dejarmoronas:
-                        mutex.acquire()
-                        self.dejamorona(moronas)
-                        mutex.release()
+                                self.move(mapa, mutex, random.randint(1,2))
                 self.obstaculo = False
 
-##
-##    def siguemoronas(self, mapa, mutex, moronas):
-##        haymoro = False
-##        moroanterior = -1
-##        moroactual = haymorona(mutex, moronas)
-##        valuemoro = 0
-##        while moronaactual != -1:
-##            haymoro = True
-##            while move(mapa, mutex, self.movactual) != 5:
-##                pass
-##            mutex.acquire()
-##            valuemorona = moronas.get_value(moroactual)
-##            del moronas[moroactual]
-##            mutex.release()
-##            
-##            
-##
-##    def haymorona(self, mutex, moronas):
-##        moronamenor = 10000
-##        for i in range(1,5):
-##                if i == 1:
-##                        posmapnew = self.mapaxy - 12
-##                if i == 2:
-##                        posmapnew = self.mapaxy + 12
-##                if i == 3:
-##                        posmapnew = self.mapaxy + 1
-##                        if ( posmapnew % 12 ) == 0:
-##                                posmapnew  = self.mapaxy
-##                if i == 4:
-##                        posmapnew = self.mapaxy - 1
-##                        if ( posmapnew % 12 ) == 11:
-##                                posmapnew = self.mapaxy
-##                mutex.acquire()
-##                if (moronas.has_key(posmapnew)) and moronas[posmapnew] < moronamenor:
-##                        moronamenor = posmapnew
-##                        self.movactual = i
-##                mutex.release()
-##        if moronamenor == 10000:
-##            moronamenor = -1
-##        return moronamenor
-##        
+
+    def siguemoronas(self, mapa, mutex, moronas):
+        seguimoro = False
+        self.valuemorona = 10000
+        m_actual = self.haymorona(mutex, moronas, mapa)
+        while m_actual != -1:
+            seguimoro = True
+            print "hola"
+            contador = 10
+            while self.move(mapa, mutex, self.movactual) == 5 and contador:
+                    self.obstaculo = False
+                    contador = contador - 1
+            mutex.acquire()
+            print "puto"
+            if moronas.has_key(self.mapaxy):
+                    self.valuemorona = moronas[self.mapaxy]
+                    del moronas[self.mapaxy]
+            mutex.release()
+            print "lamoronga"
+            m_actual = self.haymorona(mutex, moronas, mapa)
+        
+        return seguimoro
+
+
+    def haymorona(self, mutex, moronas, mapa):
+        moronamenor = 10000
+        indexm = -1
+        for i in range(1,5):
+                if i == 1:
+                        posmapnew = self.mapaxy - 12
+                if i == 2:
+                        posmapnew = self.mapaxy + 12
+                if i == 3:
+                        posmapnew = self.mapaxy + 1
+                        if ( posmapnew % 12 ) == 0:
+                                posmapnew  = self.mapaxy
+                if i == 4:
+                        posmapnew = self.mapaxy - 1
+                        if ( posmapnew % 12 ) == 11:
+                                posmapnew = self.mapaxy
+                mutex.acquire()
+                if (moronas.has_key(posmapnew)) and moronas[posmapnew] < moronamenor:
+                        moronamenor = moronas[posmapnew]
+                        self.movactual = i
+                        if moronamenor == self.valuemorona -1:
+                                mutex.release()
+                                return moronamenor
+                        if moronamenor > self.valuemorona:
+##                                self.move(mapa,mutex,random.randint(1,4))
+                                mutex.release()
+                                self.obstaculo = True
+                                self.movanterior = i
+                                return -1
+                mutex.release()
+        if moronamenor == 10000:
+            moronamenor = -1
+        return moronamenor
+        

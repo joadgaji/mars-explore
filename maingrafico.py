@@ -64,8 +64,9 @@ class maingrafico():
                     rand = random.randint(0,120)
                     while mapa.has_key(rand):
                             rand = random.randint(0,120)
-                            
-                    randcap = random.randint(5,25)
+
+                    ###        
+                    randcap = random.randint(5,10)
                     fontrob = pygame.font.SysFont("arial", 15, True);
                     ###
                     o = RobotMoronas(rand, randcap, fontrob, nave)
@@ -75,11 +76,11 @@ class maingrafico():
 
             listaEsme = []
             a = self.esme
-            while a > 20:
-                xrand = random.randint(3,20)
+            while a > 30:
+                xrand = random.randint(3,30)
                 listaEsme = listaEsme + [xrand]
                 a = a - xrand     
-            if a <= 20:
+            if a <= 30:
                     listaEsme = listaEsme + [a]
                     
             for x in listaEsme:
@@ -115,11 +116,17 @@ class maingrafico():
                     screen.blit(background, (0,0))
                     screen.blit(nave.image, nave.pos)
                     screen.blit(nave.surface, nave.postext)
+                    mutex.acquire()
+                    
                     for o in moronas.keys():
                             posmap = o
                             imagemoro = pygame.image.load('Resources/morona.jpg').convert_alpha()
                             posmoro = imagemoro.get_rect().move((posmap%12) *50,(posmap/12) *50)
+                            surfacemoro = fontnave.render(str(moronas[o]), True, (10,37,150))
+
                             screen.blit(imagemoro, posmoro)
+                            screen.blit(surfacemoro, posmoro)
+                    mutex.release()
                     for o in obstaculos:
                             screen.blit(o.image, o.pos)
                     for o in robots: 
@@ -129,8 +136,6 @@ class maingrafico():
                             if o.esmeraldas != 0:
                                     screen.blit(o.image, o.pos)
                                     screen.blit(o.surface, o.postext)
-                 
-                    print moronas
                     pygame.display.update()
             pygame.time.delay(20)
             
