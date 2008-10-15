@@ -68,7 +68,7 @@ class MyFrame(wx.Frame):
                 if x.isdigit():
                     orden = orden + [int(x)]
 
-            if len(orden) != 4:
+            if len(orden) != 5:
                 dial = wx.MessageDialog(None, "Debe seleccionar todos los numeros del 1 al 4", "Alerta", wx.OK | wx.ICON_ERROR)
                 dial.ShowModal()
                 return
