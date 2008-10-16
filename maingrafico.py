@@ -120,12 +120,12 @@ class maingrafico():
                     
                     for o in moronas.keys():
                             posmap = o
-                            imagemoro = pygame.image.load('Resources/morona.jpg').convert_alpha()
+                            imagemoro = pygame.image.load('Resources/morona.PNG').convert_alpha()
                             posmoro = imagemoro.get_rect().move((posmap%12) *50,(posmap/12) *50)
-                            surfacemoro = fontnave.render(str(moronas[o]), True, (10,37,150))
+                            #surfacemoro = fontnave.render(str(moronas[o]), True, (10,37,150))
 
                             screen.blit(imagemoro, posmoro)
-                            screen.blit(surfacemoro, posmoro)
+                            #screen.blit(surfacemoro, posmoro)
                     mutex.release()
                     for o in obstaculos:
                             screen.blit(o.image, o.pos)
