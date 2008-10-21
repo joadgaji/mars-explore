@@ -99,8 +99,8 @@ class RobotMoronas(Robot):
         posmapnew = 0
         rand = 0
         
-        if self.cargadas > 0:
-                if self.dejarmoronas:
+        if self.cargadas > 0 :
+                if self.dejarmoronas and not self.haynave(mapa, mutex):
                         mutex.acquire()
                         self.dejamorona(moronas)
                         mutex.release()
@@ -201,12 +201,14 @@ class RobotMoronas(Robot):
                     self.obstaculo = False
                     contador = contador - 1
             mutex.acquire()
-            print "puto"
+            #print "puto"
             if moronas.has_key(self.mapaxy):
                     self.valuemorona = moronas[self.mapaxy]
                     del moronas[self.mapaxy]
+                    if self.valuemorona == 1:
+                            return seguimoro
             mutex.release()
-            print "lamoronga"
+            #print "lamoronga"
             m_actual = self.haymorona(mutex, moronas, mapa)
         
         return seguimoro
@@ -235,11 +237,11 @@ class RobotMoronas(Robot):
                         if moronamenor == self.valuemorona -1:
                                 mutex.release()
                                 return moronamenor
-                        if moronamenor > self.valuemorona:
-##                                self.move(mapa,mutex,random.randint(1,4))
+                        if moronamenor > self.valuemorona and i == 4:
+##                              self.move(mapa,mutex,random.randint(1,4))
                                 mutex.release()
-                                self.obstaculo = True
-                                self.movanterior = i
+                                #self.obstaculo = True
+                                #self.movanterior = i
                                 return -1
                 mutex.release()
         if moronamenor == 10000:
