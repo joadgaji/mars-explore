@@ -6,7 +6,7 @@ try:
         import getopt
         import pygame
         from pygame.locals import *
-        import random
+        ##import random
         import threading
         import thread
         from Robot import Robot
@@ -24,13 +24,18 @@ except ImportError, err:
 
 class maingrafico():
 
-        def __init__(self, agentes, esme, orden, obs):
+        def __init__(self, agentes, esme, orden, obs,tipoCom):
             self.agentes = agentes
             self.esme = esme
             self.orden = orden
             self.obs = obs
-            print agentes, esme, orden,obs
-            self.moronas = True
+            print agentes, esme, orden, obs,tipoCom
+            self.tipoCom = tipoCom
+            if tipoCom == 'Moronas':
+                    self.moronas = True
+            else:
+                       self.moronas = False
+           ## print(self.moronas)
 
 
             pygame.init()
@@ -69,7 +74,15 @@ class maingrafico():
                     randcap = random.randint(5,10)
                     fontrob = pygame.font.SysFont("arial", 15, True);
                     ###
-                    o = RobotMoronas(rand, randcap, fontrob, nave)
+                    if self.tipoCom == 'Moronas':
+                    ##        print('juju')
+                           
+                            o = RobotMoronas(rand, randcap, fontrob, nave)
+                    else:
+                            print "soy yo"
+                           
+                            o = Robot(rand, randcap, fontrob, nave)
+                
                     mapa[rand] = o
                     robots.append(o)
                     print randcap
@@ -97,7 +110,11 @@ class maingrafico():
 
             for o in robots:
                     ###
-                    thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex, moronas,))
+                    if self.tipoCom == 'Moronas':
+                            thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex, moronas,))
+                    else:
+                            print "soy tu"
+                            thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex,))
                     
             while 1:
                     if nave.piedras == self.esme:
@@ -116,17 +133,20 @@ class maingrafico():
                     screen.blit(background, (0,0))
                     screen.blit(nave.image, nave.pos)
                     screen.blit(nave.surface, nave.postext)
-                    mutex.acquire()
-                    
-                    for o in moronas.keys():
-                            posmap = o
-                            imagemoro = pygame.image.load('Resources/morona.PNG').convert_alpha()
-                            posmoro = imagemoro.get_rect().move((posmap%12) *50,(posmap/12) *50)
-                            #surfacemoro = fontnave.render(str(moronas[o]), True, (10,37,150))
 
-                            screen.blit(imagemoro, posmoro)
-                            #screen.blit(surfacemoro, posmoro)
-                    mutex.release()
+                    if self.tipoCom == 'Moronas':
+                            
+                            mutex.acquire()              
+                            for o in moronas.keys():
+                                            posmap = o
+                                            imagemoro = pygame.image.load('Resources/morona.PNG').convert_alpha()
+                                            posmoro = imagemoro.get_rect().move((posmap%12) *50,(posmap/12) *50)
+                                            #surfacemoro = fontnave.render(str(moronas[o]), True, (10,37,150))
+
+                                            screen.blit(imagemoro, posmoro)
+                                            #screen.blit(surfacemoro, posmoro)
+                            mutex.release()
+                            
                     for o in obstaculos:
                             screen.blit(o.image, o.pos)
                     for o in robots: 
