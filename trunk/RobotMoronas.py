@@ -206,6 +206,7 @@ class RobotMoronas(Robot):
                     self.valuemorona = moronas[self.mapaxy]
                     del moronas[self.mapaxy]
                     if self.valuemorona == 1:
+                            mutex.release()
                             return seguimoro
             mutex.release()
             #print "lamoronga"
@@ -237,13 +238,14 @@ class RobotMoronas(Robot):
                         if moronamenor == self.valuemorona -1:
                                 mutex.release()
                                 return moronamenor
-                        if moronamenor > self.valuemorona and i == 4:
-##                              self.move(mapa,mutex,random.randint(1,4))
-                                mutex.release()
-                                #self.obstaculo = True
-                                #self.movanterior = i
-                                return -1
+
                 mutex.release()
+                if moronamenor > self.valuemorona and i == 4:
+##                      self.move(mapa,mutex,random.randint(1,4))
+                        #mutex.release()
+                        #self.obstaculo = True
+                        #self.movanterior = i
+                        return -1
         if moronamenor == 10000:
             moronamenor = -1
         return moronamenor
