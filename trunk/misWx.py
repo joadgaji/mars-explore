@@ -23,7 +23,7 @@ class MyFrame(wx.Frame):
         label4 = wx.StaticText(panel, -1, "Capa1: Evitar obstaculos \nCapa2: Volver a la nave \nCapa3: Recoger esmeraldas \nCapa4:Moronas \nCapa5: Explorar \n\n\n " )
         label5 = wx.StaticText(panel, -1, "Numero de piedras para generar obstaculos:")
         com = wx.StaticText(panel, -1, "Tipo de comuncacion:")
-        x = ['Reactivos', 'Moronas']
+        x = ['Reactivos', 'Moronas', 'KQML']
         self.agentes = wx.TextCtrl(panel, -1, "", style=0)
         self.esmeraldas = wx.TextCtrl(panel, -1, "", style=0)
         self.capas = wx.TextCtrl(panel, -1, "", style=0)
@@ -68,9 +68,10 @@ class MyFrame(wx.Frame):
                 dial.ShowModal()
                 return
 
-            if self.tipoCom.GetValue() == 'Moronas':
+            if self.tipoCom.GetValue() == 'Moronas' or self.tipoCom.GetValue() == 'KQML':
                 a = 5
-            else:
+            else :
+                ##le cambie a 5 y habia 4
                 a = 4
                 
             for x in self.capas.GetValue():
