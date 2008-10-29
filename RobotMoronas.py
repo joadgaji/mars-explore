@@ -195,7 +195,7 @@ class RobotMoronas(Robot):
         m_actual = self.haymorona(mutex, moronas, mapa)
         while m_actual != -1:
             seguimoro = True
-            print "hola"
+            
             contador = 10
             while self.move(mapa, mutex, self.movactual) == 5 and contador:
                     self.obstaculo = False

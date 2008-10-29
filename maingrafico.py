@@ -14,6 +14,7 @@ try:
         from Nave import *
         from Esmeralda import *
         from RobotMoronas import *
+        from RobotMensaje import *
 
 
 except ImportError, err:
@@ -29,13 +30,13 @@ class maingrafico():
             self.esme = esme
             self.orden = orden
             self.obs = obs
-            print agentes, esme, orden, obs,tipoCom
+            
             self.tipoCom = tipoCom
             if tipoCom == 'Moronas':
                     self.moronas = True
             else:
                        self.moronas = False
-           ## print(self.moronas)
+
 
 
             pygame.init()
@@ -56,6 +57,7 @@ class maingrafico():
             mapa[posnave] = nave
 
             moronas = {}
+            mensajes = []
             listaPos = self.generarObs(obs,mapa)
 
             for i in listaPos:
@@ -69,23 +71,22 @@ class maingrafico():
                     rand = random.randint(0,120)
                     while mapa.has_key(rand):
                             rand = random.randint(0,120)
-
-                    ###        
+       
                     randcap = random.randint(5,10)
                     fontrob = pygame.font.SysFont("arial", 15, True);
-                    ###
+                   
                     if self.tipoCom == 'Moronas':
-                    ##        print('juju')
-                           
                             o = RobotMoronas(rand, randcap, fontrob, nave)
-                    else:
-                            print "soy yo"
-                           
+                            
+                    elif self.tipoCom == 'Reactivos':
+                            
                             o = Robot(rand, randcap, fontrob, nave)
+                    elif self.tipoCom == 'KQML':
+                            o = RobotMensaje(rand, randcap, fontrob, nave, "robot"+str(x))
                 
                     mapa[rand] = o
                     robots.append(o)
-                    print randcap
+                    
 
             listaEsme = []
             a = self.esme
@@ -109,13 +110,14 @@ class maingrafico():
                     esmeraldas.append(esme)
 
             for o in robots:
-                    ###
+                    
                     if self.tipoCom == 'Moronas':
                             thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex, moronas,))
-                    else:
-                            print "soy tu"
+                    elif self.tipoCom == 'Reactivos':
                             thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex,))
-                    
+                    elif self.tipoCom == 'KQML':
+                            thread.start_new_thread(o.dispararcapas, (capas, mapa, mutex, mensajes,))
+
             while 1:
                     if nave.piedras == self.esme:
                             for o in robots:
@@ -136,7 +138,7 @@ class maingrafico():
 
                     if self.tipoCom == 'Moronas':
                             
-                            mutex.acquire()              
+                            mutex.acquire()
                             for o in moronas.keys():
                                             posmap = o
                                             imagemoro = pygame.image.load('Resources/morona.PNG').convert_alpha()
@@ -146,7 +148,7 @@ class maingrafico():
                                             screen.blit(imagemoro, posmoro)
                                             #screen.blit(surfacemoro, posmoro)
                             mutex.release()
-                            
+
                     for o in obstaculos:
                             screen.blit(o.image, o.pos)
                     for o in robots: 
