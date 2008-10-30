@@ -47,6 +47,7 @@ class RobotMoronas(Robot):
         self.pos = self.image.get_rect().move(self.positionx, self.positiony)
         self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2), ((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
 
+
     def dispararcapas(self, capas, mapa, mutex, moronas, *args):
                 while self.seguir:
                         for event in pygame.event.get():
@@ -60,10 +61,10 @@ class RobotMoronas(Robot):
                                         if self.evitarobs(mapa,mutex, moronas):
                                                 break
                                 if a == 2:
-                                        if self.regresoanave(mapa,mutex,moronas):
+                                        if self.regresoanave(mapa,mutex, self.nave, moronas):
                                                 break
                                 if a == 3:
-                                        if self.cargaesme(mapa, mutex):
+                                        if self.cargaesme(mapa, mutex, "moronas"):
                                                 break
                                 if a == 4:
                                         if self.siguemoronas(mapa, mutex, moronas):
@@ -72,42 +73,27 @@ class RobotMoronas(Robot):
                                         if self.explorar(mapa, mutex):
                                                 break
 
-    def cargaesme(self, mapa, mutex):
-        cargue = False
-        if self.cargadas < self.capacidad:
-                h = self.hayesme(mapa,mutex)
-                while h != -1:
-                        if self.cargadas < self.capacidad:
-                                cargue = True
-                                self.carga(h, mapa, mutex)
-                        if mapa.has_key(h) and self.cargadas == self.capacidad:
-                                self.dejarmoronas = True
-                        if not(mapa.has_key(h)) or self.cargadas == self.capacidad:
-                                h = -1
-
-        return cargue
 
     def dejamorona(self, moronas):
             moronas[self.mapaxy] = self.nummorona
             self.nummorona = self.nummorona + 1
 
-    def regresoanave(self, mapa, mutex, moronas):
-        movx = (self.nave.positionx / 50) - self.mapaxy%12
-        movy = (self.nave.positiony / 50) - self.mapaxy/12
-       # print movx, movy
+
+    def regresoanave(self, mapa, mutex, cosa, moronas):
+        movx = (cosa.positionx / 50) - self.mapaxy%12
+        movy = (cosa.positiony / 50) - self.mapaxy/12
         entreacapa = False
         posmapnew = 0
         rand = 0
         
         if self.cargadas > 0 :
-                if self.dejarmoronas and not self.haynave(mapa, mutex):
+                if self.dejarmoronas and self.hayAlgo(mapa, mutex, cosa, "moronas") == -1:
                         mutex.acquire()
                         self.dejamorona(moronas)
                         mutex.release()
                 entreacapa = True
 
-                if not self.haynave(mapa, mutex):
-                        ###
+                if self.hayAlgo(mapa, mutex,cosa, "moronas") == -1:
                         if random.randint(0,1):
                                 if movx < 0:
                                         rand = 4
@@ -122,71 +108,7 @@ class RobotMoronas(Robot):
                                 elif movy < 0:
                                         rand = 1
                                         self.move(mapa, mutex, 1)
-                               # mutex.release()
         return entreacapa
-
-    def haynave(self, mapa, mutex):
-            estanave = False
-            for i in range(1,5):
-                    if i == 1:
-                            posmapnew = self.mapaxy - 12
-                    if i == 2:
-                            posmapnew = self.mapaxy + 12
-                    if i == 3:
-                            posmapnew = self.mapaxy + 1
-                            if ( posmapnew % 12 ) == 0:
-                                    posmapnew  = self.mapaxy
-                    if i == 4:
-                            posmapnew = self.mapaxy - 1
-                            if ( posmapnew % 12 ) == 11:
-                                    posmapnew = self.mapaxy
-                    mutex.acquire()
-                    if (mapa.has_key(posmapnew)):
-                            if mapa[posmapnew].mytype() == "soylanavepitoembocas":
-                                    estanave = True
-                                    self.dejarmoronas = False
-                                    self.nummorona = 1
-                                    self.descarga(mapa, mutex, posmapnew)
-                    mutex.release()
-            return estanave
-
-    def evitarobs(self, mapa, mutex, moronas):
-        if not(self.obstaculo):
-                return False
-        elif self.cargadas == 0:
-                movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
-                self.move(mapa, mutex, movactual)
-                #self.move(mapa, mutex, random.randint(1,4))
-                self.obstaculo = False
-        else:
-                movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
-                self.move(mapa, mutex, movactual)
-                if self.dejarmoronas:
-                        mutex.acquire()
-                        self.dejamorona(moronas)
-                        mutex.release()
-                #self.move(mapa, mutex, movactual)
-                movx = (self.nave.positionx / 50) - self.mapaxy%12
-                movy = (self.nave.positiony / 50) - self.mapaxy/12
-                if movactual == 1 or movactual == 2:
-                        if movx < 0:
-                                rand = 4
-                                self.move(mapa, mutex, 4)
-                        elif movx > 0:
-                                rand = 3
-                                self.move(mapa, mutex, 3)
-                        elif movx == 0:
-                                self.move(mapa, mutex, random.randint(3,4))
-                else:
-                        if movy > 0:
-                                rand = 2
-                                self.move(mapa, mutex, 2)
-                        elif movy < 0:
-                                rand = 1
-                                self.move(mapa, mutex, 1)
-                        elif movy == 0:
-                                self.move(mapa, mutex, random.randint(1,2))
-                self.obstaculo = False
 
 
     def siguemoronas(self, mapa, mutex, moronas):
@@ -201,7 +123,6 @@ class RobotMoronas(Robot):
                     self.obstaculo = False
                     contador = contador - 1
             mutex.acquire()
-            #print "puto"
             if moronas.has_key(self.mapaxy):
                     self.valuemorona = moronas[self.mapaxy]
                     del moronas[self.mapaxy]
@@ -209,7 +130,6 @@ class RobotMoronas(Robot):
                             mutex.release()
                             return seguimoro
             mutex.release()
-            #print "lamoronga"
             m_actual = self.haymorona(mutex, moronas, mapa)
         
         return seguimoro
@@ -241,12 +161,44 @@ class RobotMoronas(Robot):
 
                 mutex.release()
                 if moronamenor > self.valuemorona and i == 4:
-##                      self.move(mapa,mutex,random.randint(1,4))
-                        #mutex.release()
-                        #self.obstaculo = True
-                        #self.movanterior = i
                         return -1
         if moronamenor == 10000:
             moronamenor = -1
         return moronamenor
-        
+
+
+    def evitarobs(self, mapa, mutex, moronas):
+        if not(self.obstaculo):
+                return False
+        elif self.cargadas == 0:
+                movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
+                self.move(mapa, mutex, movactual)
+                self.obstaculo = False
+        else:
+                movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
+                self.move(mapa, mutex, movactual)
+                if self.dejarmoronas:
+                        mutex.acquire()
+                        self.dejamorona(moronas)
+                        mutex.release()
+                movx = (self.nave.positionx / 50) - self.mapaxy%12
+                movy = (self.nave.positiony / 50) - self.mapaxy/12
+                if movactual == 1 or movactual == 2:
+                        if movx < 0:
+                                rand = 4
+                                self.move(mapa, mutex, 4)
+                        elif movx > 0:
+                                rand = 3
+                                self.move(mapa, mutex, 3)
+                        elif movx == 0:
+                                self.move(mapa, mutex, random.randint(3,4))
+                else:
+                        if movy > 0:
+                                rand = 2
+                                self.move(mapa, mutex, 2)
+                        elif movy < 0:
+                                rand = 1
+                                self.move(mapa, mutex, 1)
+                        elif movy == 0:
+                                self.move(mapa, mutex, random.randint(1,2))
+                self.obstaculo = False

@@ -58,10 +58,10 @@ class RobotMensaje(Robot):
                     mutex.release()
                     for a in self.capas:
                             if a == 1:
-                                    if self.evitarobs(mapa,mutex):
+                                    if self.evitarobs(mapa,mutex, self.nave):
                                             break
                             if a == 2:
-                                    if self.regresoanave(mapa,mutex):
+                                    if self.regresoAPos(mapa,mutex,self.nave):
                                             break
                             if a == 3:
                                     if self.cargaesme(mapa, mutex, mensajes):
@@ -76,82 +76,83 @@ class RobotMensaje(Robot):
     def cargaesme(self, mapa, mutex, mensajes):
         cargue = False
         if self.cargadas < self.capacidad:
-                h = self.hayesme(mapa,mutex)
+                h = self.hayAlgo(mapa,mutex, "esmeralda", "buscar")
                 while h != -1:
                         if self.cargadas < self.capacidad:
                                 cargue = True
                                 self.carga(h, mapa, mutex)
+                        mutex.acquire()
                         if mapa.has_key(h) and self.cargadas == self.capacidad:
                             if h not in mensajes:
                                 self.mandaMensaje(mensajes, h, mutex)
                         if not(mapa.has_key(h)):
-                            mutex.acquire()
                             if h in mensajes:
                                 del mensajes[mensajes.index(h)]
-                            mutex.release()
                         if not(mapa.has_key(h)) or self.cargadas == self.capacidad:
                                 h = -1
+                        mutex.release()
 
         return cargue   
 
     def mandaMensaje(self, mensajes, posesme, mutex):
-        mutex.acquire()
         mensajes.append(posesme)
-        mutex.release()
         print "(Informar-KQML"
         print ":sender", self.nombre
         print ":receiver broadcast"
         print ":language KQML"
         print ":ontology marte-sinamigos"
         print ":content hay esmeraldas en:", posesme, ")"
+        print ""
 
     def leermensaje(self, mapa, mutex, mensajes):
         entrecapa = False
         posesmeralda = -1
-        mutex.acquire()
         
+        mutex.acquire()
         for x in mensajes:
             entrecapa = self.factorDistancia(mapa, mutex, x)
             if entrecapa:
                 posesmeralda = x
                 break
         mutex.release()
-            
+        
         if entrecapa:
-            self.irAEsme(mapa, mutex, posesmeralda)
+                print "voy a ir",  posesmeralda
+                self.irAEsme(mapa, mutex, posesmeralda)
+                return True
+        return False
             
     def factorDistancia(self, mapa, mutex, posesme):
-        #print mapa, "mapa - ", posesme, "PosEsme"
+        print posesme, "PosEsme"
         movx = 0
         movy = 0
-        if mapa.has_key(posesme):
-            movx = (mapa[posesme].positionx / 50) - self.mapaxy%12
-            movy = (mapa[posesme].positiony / 50) - self.mapaxy/12
-        else:
-            return False
-        posmapnew = 0
-        rand = 0
-        
-        if movx < 6 and movx > -6 and movy < 6 and movy > -6:
-            return True
 
+        if mapa.has_key(posesme):
+            movx = (posesme%12) - self.mapaxy%12
+            movy = (posesme/12) - self.mapaxy/12
+            if movx < 6 and movx > -6 and movy < 6 and movy > -6:
+                    return True
         return False
 
     def irAEsme(self, mapa, mutex, posesmeralda):
-        print "Yo si le voy le voy al toluca"
-        movx = (mapa[posesmeralda].positionx / 50) - self.mapaxy%12
-        movy = (mapa[posesmeralda].positiony / 50) - self.mapaxy/12
-        posmapnew = 0
         rand = 0
-        
-        if not self.hayEsme(mapa, mutex, posesmeralda):
-                        if random.randint(0,1):
+        while self.hayAlgo(mapa, mutex, posesmeralda, "llegarEsme") == -1:
+                movx = (posesmeralda%12) - self.mapaxy%12
+                movy = (posesmeralda/12) - self.mapaxy/12
+                if self.obstaculo:
+                        movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
+                        self.move(mapa, mutex, movactual)
+                        movx = (posesmeralda%12) - self.mapaxy%12
+                        movy = (posesmeralda/12) - self.mapaxy/12
+                        if movactual == 1 or movactual == 2:
                                 if movx < 0:
                                         rand = 4
                                         self.move(mapa, mutex, 4)
                                 elif movx > 0:
                                         rand = 3
                                         self.move(mapa, mutex, 3)
+                                elif movx == 0:
+                                        self.move(mapa, mutex, random.randint(3,4))
                         else:
                                 if movy > 0:
                                         rand = 2
@@ -159,26 +160,20 @@ class RobotMensaje(Robot):
                                 elif movy < 0:
                                         rand = 1
                                         self.move(mapa, mutex, 1)
-
-        return 
-
-    def hayEsme(self, mapa, mutex, posesmeralda):
-        estaesmeralda = False
-        for i in range(1,5):
-                if i == 1:
-                        posmapnew = self.mapaxy - 12
-                if i == 2:
-                        posmapnew = self.mapaxy + 12
-                if i == 3:
-                        posmapnew = self.mapaxy + 1
-                        if ( posmapnew % 12 ) == 0:
-                                posmapnew  = self.mapaxy
-                if i == 4:
-                        posmapnew = self.mapaxy - 1
-                        if ( posmapnew % 12 ) == 11:
-                                posmapnew = self.mapaxy
-                                
-                if posesmeralda == posmapnew:
-                    estaesmeralda = True
-                    
-        return estaesmeralda
+                                elif movy == 0:
+                                        self.move(mapa, mutex, random.randint(1,2))
+                        self.obstaculo = False
+                if random.randint(0,1):
+                        if movx < 0:
+                                rand = 4
+                                self.move(mapa, mutex, 4)
+                        elif movx > 0:
+                                rand = 3
+                                self.move(mapa, mutex, 3)
+                else:
+                        if movy > 0:
+                                rand = 2
+                                self.move(mapa, mutex, 2)
+                        elif movy < 0:
+                                rand = 1
+                                self.move(mapa, mutex, 1)
