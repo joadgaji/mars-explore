@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
         import sys
         import random
@@ -52,25 +53,26 @@ class Robot:
                         mutex.release()
                         for a in self.capas:
                                 if a == 1:
-                                        if self.evitarobs(mapa,mutex):
+                                        if self.evitarobs(mapa,mutex, self.nave):
                                                 break
                                 if a == 2:
-                                        if self.regresoanave(mapa,mutex):
+                                        if self.regresoAPos(mapa,mutex, self.nave):
                                                 break
                                 if a == 3:
-                                        if self.cargaesme(mapa, mutex):
+                                        if self.cargaesme(mapa, mutex, ""):
                                                 break
                                 if a == 4:
                                         if self.explorar(mapa, mutex):
                                                 break
 
-                                     
+                                        
         def mytype(self):
                 return "robot"
 
-        def regresoanave(self, mapa, mutex):
-                movx = (self.nave.positionx / 50) - self.mapaxy%12
-                movy = (self.nave.positiony / 50) - self.mapaxy/12
+##Se modificó lo de regreso a algun lugar
+        def regresoAPos(self, mapa, mutex, cosa):
+                movx = (cosa.positionx / 50) - self.mapaxy%12
+                movy = (cosa.positiony / 50) - self.mapaxy/12
                 entreacapa = False
                 posmapnew = 0
                 rand = 0
@@ -78,8 +80,7 @@ class Robot:
                 if self.cargadas > 0:
                         entreacapa = True
                 
-                        if not self.haynave(mapa, mutex):
-                                ###
+                        if self.hayAlgo(mapa, mutex, cosa, "llegar") == -1:
                                 if random.randint(0,1):
                                         if movx < 0:
                                                 rand = 4
@@ -97,9 +98,15 @@ class Robot:
 
                 return entreacapa
                 
-                        
-        def haynave(self, mapa, mutex):
-                estanave = False
+
+##SE modifico a revisar a un lugar cualquiera
+## Si la finalidad es buscar entonces no sabe que pos busca
+## si la finalidad es llegar sabe la posicion a la que tiene que llegar y es con
+        ## la que compara
+        def hayAlgo(self, mapa, mutex, cosa, finalidad):
+                if finalidad == "llegar" or finalidad == "moronas":
+                        poshit = cosa.mapaxy
+                estaeso = -1
                 for i in range(1,5):
                         if i == 1:
                                 posmapnew = self.mapaxy - 12
@@ -113,13 +120,32 @@ class Robot:
                                 posmapnew = self.mapaxy - 1
                                 if ( posmapnew % 12 ) == 11:
                                         posmapnew = self.mapaxy
-                        mutex.acquire()
-                        if (mapa.has_key(posmapnew)):
-                                if mapa[posmapnew].mytype() == "soylanavepitoembocas":
-                                        estanave = True                                        
+
+                        if finalidad == "llegarEsme":
+                                if cosa == posmapnew:
+                                        return posmapnew
+                        if finalidad == "llegar":            
+                                if posmapnew == poshit and cosa.mytype() == "soylanavepitoembocas":
+                                        estaeso = 1
+                                        mutex.acquire()
                                         self.descarga(mapa, mutex, posmapnew)
-                        mutex.release()
-                return estanave
+                                        mutex.release()
+                        if finalidad == "buscar":
+                                mutex.acquire()
+                                if (mapa.has_key(posmapnew)):
+                                        if mapa[posmapnew].mytype() == cosa and self.cargadas < self.capacidad:
+                                                estaeso = posmapnew
+                                mutex.release()
+                        if finalidad == "moronas":
+                                if posmapnew == poshit and cosa.mytype() == "soylanavepitoembocas":
+                                        mutex.acquire()
+                                        estanave = True
+                                        self.dejarmoronas = False
+                                        self.nummorona = 1
+                                        self.descarga(mapa, mutex, posmapnew)
+                                        mutex.release()
+                                        estaeso = 1
+                return estaeso
 
 
         def descarga(self, mapa, mutex, posmapnew):
@@ -127,18 +153,20 @@ class Robot:
                         self.cambiarnum(-1, mutex)
                         mapa[posmapnew].aumentap(mutex)
 
-
-        def cargaesme(self, mapa, mutex):
-                cargue = False
-                if self.cargadas < self.capacidad:
-                        h = self.hayesme(mapa,mutex)
-                        while h != -1:
-                                if self.cargadas < self.capacidad:
-                                        cargue = True
-                                        self.carga(h, mapa, mutex)
-                                if not(mapa.has_key(h)) or (self.cargadas == self.capacidad):
-                                        h = -1
-                return cargue
+                        
+        def cargaesme(self, mapa, mutex, finalidad):
+            cargue = False
+            if self.cargadas < self.capacidad:
+                    h = self.hayAlgo(mapa,mutex, "esmeralda", "buscar")
+                    while h != -1:
+                            if self.cargadas < self.capacidad:
+                                    cargue = True
+                                    self.carga(h, mapa, mutex)
+                            if mapa.has_key(h) and self.cargadas == self.capacidad and finalidad == "moronas":
+                                    self.dejarmoronas = True
+                            if not(mapa.has_key(h)) or self.cargadas == self.capacidad:
+                                    h = -1
+            return cargue
 
                 
         def carga(self, posesme, mapa, mutex):
@@ -148,28 +176,6 @@ class Robot:
                         self.cambiarnum(1,  mutex)
                 mutex.release()
 
-        def hayesme(self, mapa, mutex):
-                pospiedra = -1
-                for i in range(1,5):
-                        if i == 1:
-                                posmapnew = self.mapaxy - 12
-                        if i == 2:
-                                posmapnew = self.mapaxy + 12
-                        if i == 3:
-                                posmapnew = self.mapaxy + 1
-                                if ( posmapnew % 12 ) == 0:
-                                        posmapnew  = self.mapaxy
-                        if i == 4:
-                                posmapnew = self.mapaxy - 1
-                                if ( posmapnew % 12 ) == 11:
-                                        posmapnew = self.mapaxy
-                        mutex.acquire()
-                        if (mapa.has_key(posmapnew)):
-                                if mapa[posmapnew].mytype() == "esmeralda" and self.cargadas < self.capacidad:
-                                        pospiedra = posmapnew
-                        mutex.release()
-
-                return pospiedra
 
         def cambiarnum(self,num, mutex):
                 self.cargadas = self.cargadas + num
@@ -178,23 +184,21 @@ class Robot:
                         self.surface = self.fontrob.render(str(self.cargadas), True, (250,30,30))
                 
                 self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2), ((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
-                pygame.time.delay(40)
+                pygame.time.delay(30)
 
 
-        def evitarobs(self, mapa, mutex):
+        def evitarobs(self, mapa, mutex, cosa):
                 if not(self.obstaculo):
                         return False
                 elif self.cargadas == 0:
                         movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
                         self.move(mapa, mutex, movactual)
-                        #self.move(mapa, mutex, random.randint(1,4))
                         self.obstaculo = False
                 else:
                         movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
                         self.move(mapa, mutex, movactual)
-                        #self.move(mapa, mutex, movactual)
-                        movx = (self.nave.positionx / 50) - self.mapaxy%12
-                        movy = (self.nave.positiony / 50) - self.mapaxy/12
+                        movx = (cosa.positionx / 50) - self.mapaxy%12
+                        movy = (cosa.positiony / 50) - self.mapaxy/12
                         if movactual == 1 or movactual == 2:
                                 if movx < 0:
                                         rand = 4
@@ -251,49 +255,14 @@ class Robot:
                 self.movimiento = rand
                 for i in range(self.frame):
                         self.movimientos()
-                        pygame.time.delay(30)
+                        pygame.time.delay(25)
 
                 return rand
 
 
         def explorar(self, mapa, mutex):
                 rand = random.randint(1,4)
-                posmapnew = 0
-                
-                if rand == 1:
-                        posmapnew = self.mapaxy - 12
-                if rand == 2:
-                        posmapnew = self.mapaxy + 12
-                if rand == 3:
-                        posmapnew = self.mapaxy + 1
-                        if ( posmapnew % 12 ) == 0:
-                                posmapnew  = self.mapaxy
-                if rand == 4:
-                        posmapnew = self.mapaxy - 1
-                        if ( posmapnew % 12 ) == 11:
-                                posmapnew = self.mapaxy
-
-                self.movanterior = rand
-                
-                mutex.acquire()
-                if posmapnew >= 0  and posmapnew < 120:
-                        if not(mapa.has_key(posmapnew)):
-                                mapa[posmapnew] = self
-                                del mapa[self.mapaxy]
-                                self.mapaxy = posmapnew
-                        else:
-                                rand = 5
-                                self.obstaculo = True
-                else:
-                        rand = 5
-                        self.obstaculo = True
-                mutex.release()
-                
-                self.movimiento = rand
-                for i in range(self.frame):
-                        self.movimientos()
-                        pygame.time.delay(30)
-
+                self.move(mapa, mutex, rand)
                 return True
 
         def movimientos(self):
@@ -325,4 +294,3 @@ class Robot:
         def moveleft(self):
                 self.pos = self.pos.move(-self.speed, 0)
                 self.postext = self.postext.move(-self.speed, 0)
-                
