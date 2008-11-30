@@ -23,7 +23,7 @@ class MyFrame(wx.Frame):
         label4 = wx.StaticText(panel, -1, "Capa1: Evitar obstaculos \nCapa2: Volver a la nave \nCapa3: Recoger esmeraldas \nCapa4:Moronas \nCapa5: Explorar \n\n\n " )
         label5 = wx.StaticText(panel, -1, "Numero de piedras para generar obstaculos:")
         com = wx.StaticText(panel, -1, "Tipo de comuncacion:")
-        x = ['Reactivos', 'Moronas', 'KQML']
+        x = ['Reactivos', 'Moronas', 'KQML', 'Negociacion']
         self.agentes = wx.TextCtrl(panel, -1, "", style=0)
         self.esmeraldas = wx.TextCtrl(panel, -1, "", style=0)
         self.capas = wx.TextCtrl(panel, -1, "", style=0)
@@ -62,39 +62,39 @@ class MyFrame(wx.Frame):
     
 
     def buttonClick(self,event):
-            orden = []
-            if (self.agentes.GetValue() == "" or self.esmeraldas.GetValue() == "" or self.capas.GetValue() == "" or self.obs.GetValue() == ""  or self.tipoCom.GetValue() == ""):
-                dial = wx.MessageDialog(None, "Todos los campos deben estar llenos", "Alerta", wx.OK | wx.ICON_ERROR)
-                dial.ShowModal()
-                return
-
-            if self.tipoCom.GetValue() == 'Moronas' or self.tipoCom.GetValue() == 'KQML':
-                a = 5
-            else :
-                ##le cambie a 5 y habia 4
-                a = 4
-                
-            for x in self.capas.GetValue():
-                if x.isdigit():
-                    orden = orden + [int(x)]
-
-            if len(orden) != a:
-                dial = wx.MessageDialog(None, "Debe seleccionar todos los numeros del 1 al 5", "Alerta", wx.OK | wx.ICON_ERROR)
-                dial.ShowModal()
-                return
-
-            for x in range(1,a+1):
-                
-                if not orden.count(x) > 0:
-                               dial = wx.MessageDialog(None, "Debes seleccionar todos los numeros del 1 al 5", "Alerta", wx.OK | wx.ICON_ERROR)
-                               dial.ShowModal()
-                               return
+##            orden = []
+##            if (self.agentes.GetValue() == "" or self.esmeraldas.GetValue() == "" or self.capas.GetValue() == "" or self.obs.GetValue() == ""  or self.tipoCom.GetValue() == ""):
+##                dial = wx.MessageDialog(None, "Todos los campos deben estar llenos", "Alerta", wx.OK | wx.ICON_ERROR)
+##                dial.ShowModal()
+##                return
+##
+##            if self.tipoCom.GetValue() == "Negociacion" or self.tipoCom.GetValue() == 'Moronas' or self.tipoCom.GetValue() == 'KQML':
+##                a = 5
+##            else :
+##                ##le cambie a 5 y habia 4
+##                a = 4
+##                
+##            for x in self.capas.GetValue():
+##                if x.isdigit():
+##                    orden = orden + [int(x)]
+##
+##            if len(orden) != a:
+##                dial = wx.MessageDialog(None, "Debe seleccionar todos los numeros del 1 al 5", "Alerta", wx.OK | wx.ICON_ERROR)
+##                dial.ShowModal()
+##                return
+##
+##            for x in range(1,a+1):
+##                
+##                if not orden.count(x) > 0:
+##                               dial = wx.MessageDialog(None, "Debes seleccionar todos los numeros del 1 al 5", "Alerta", wx.OK | wx.ICON_ERROR)
+##                               dial.ShowModal()
+##                               return
 
             
 
            ## try:
-                 
-                maingrafico(int(self.agentes.GetValue()),int(self.esmeraldas.GetValue()), orden, int(self.obs.GetValue()),self.tipoCom.GetValue())
+                 maingrafico(1,150, [1,2,3,4], 4,'Reactivos', 1)
+               ## maingrafico(int(self.agentes.GetValue()),int(self.esmeraldas.GetValue()), orden, int(self.obs.GetValue()),self.tipoCom.GetValue())
               ##   return [int(self.agentes.GetValue()),int(self.esmeraldas.GetValue()), orden, int(self.obs.GetValue())]
             ##except:
             ##    dial = wx.MessageDialog(None, "Llene los datos correctamente", "Alerta", wx.OK | wx.ICON_ERROR)

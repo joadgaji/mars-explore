@@ -32,7 +32,7 @@ class Nave:
 ##                mutex.aquire()
                 self.piedras = self.piedras + 1
                 self.surface = self.fontnave.render(str(self.piedras), True, (240,20,20))
-                self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2), ((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
+                self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2),((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
 ##                mutex.release()
 
         def postext(self, surface):

@@ -48,7 +48,7 @@ class RobotMensaje(Robot):
         self.pos = self.image.get_rect().move(self.positionx, self.positiony)
         self.postext = self.surface.get_rect().move(((self.mapaxy%12) *50) +25 - (self.surface.get_size()[0]/ 2), ((self.mapaxy/12) *50) + 25 - (self.surface.get_size()[1]/ 2))
 
-    def dispararcapas(self, capas, mapa, mutex, mensajes, *args):
+    def dispararcapas(self, capas, mapa, mutex, mensajes, mensajeKQML, *args):
             while self.seguir:
                     for event in pygame.event.get():
                             if event.type in (QUIT, KEYDOWN):
@@ -64,7 +64,7 @@ class RobotMensaje(Robot):
                                     if self.regresoAPos(mapa,mutex,self.nave):
                                             break
                             if a == 3:
-                                    if self.cargaesme(mapa, mutex, mensajes):
+                                    if self.cargaesme(mapa, mutex, mensajes, mensajeKQML):
                                             break
                             if a == 4:
                                     if self.leermensaje(mapa, mutex, mensajes):
@@ -73,7 +73,7 @@ class RobotMensaje(Robot):
                                     if self.explorar(mapa, mutex):
                                             break
 
-    def cargaesme(self, mapa, mutex, mensajes):
+    def cargaesme(self, mapa, mutex, mensajes, mensajeKQML):
         cargue = False
         if self.cargadas < self.capacidad:
                 h = self.hayAlgo(mapa,mutex, "esmeralda", "buscar")
@@ -84,7 +84,7 @@ class RobotMensaje(Robot):
                         mutex.acquire()
                         if mapa.has_key(h) and self.cargadas == self.capacidad:
                             if h not in mensajes:
-                                self.mandaMensaje(mensajes, h, mutex)
+                                self.mandaMensaje(mensajes, h, mensajeKQML, mutex)
                         if not(mapa.has_key(h)):
                             if h in mensajes:
                                 del mensajes[mensajes.index(h)]
@@ -94,14 +94,15 @@ class RobotMensaje(Robot):
 
         return cargue   
 
-    def mandaMensaje(self, mensajes, posesme, mutex):
+    def mandaMensaje(self, mensajes, posesme, mensajeKQML, mutex):
         mensajes.append(posesme)
+        mensajeKQML.append((self.nombre, posesme))
         print "(Informar-KQML"
         print ":sender", self.nombre
         print ":receiver broadcast"
         print ":language KQML"
         print ":ontology marte-sinamigos"
-        print ":content hay esmeraldas en:", posesme, ")"
+        print ":content hay esmeraldas en: (", posesme%12 + 1, ",",  posesme/12 +1,"))"
         print ""
 
     def leermensaje(self, mapa, mutex, mensajes):
@@ -117,13 +118,13 @@ class RobotMensaje(Robot):
         mutex.release()
         
         if entrecapa:
-                print "voy a ir",  posesmeralda
+                #print "voy a ir",  posesmeralda
                 self.irAEsme(mapa, mutex, posesmeralda)
                 return True
         return False
             
     def factorDistancia(self, mapa, mutex, posesme):
-        print posesme, "PosEsme"
+        #print posesme, "PosEsme"
         movx = 0
         movy = 0
 
@@ -136,10 +137,13 @@ class RobotMensaje(Robot):
 
     def irAEsme(self, mapa, mutex, posesmeralda):
         rand = 0
+        
         while self.hayAlgo(mapa, mutex, posesmeralda, "llegarEsme") == -1:
+                print 'ran', rand
                 movx = (posesmeralda%12) - self.mapaxy%12
                 movy = (posesmeralda/12) - self.mapaxy/12
                 if self.obstaculo:
+                        print 'esme'
                         movactual = {1 : 2, 2 : 1, 3 : 4, 4 : 3}[self.movanterior]
                         self.move(mapa, mutex, movactual)
                         movx = (posesmeralda%12) - self.mapaxy%12
@@ -164,6 +168,7 @@ class RobotMensaje(Robot):
                                         self.move(mapa, mutex, random.randint(1,2))
                         self.obstaculo = False
                 if random.randint(0,1):
+                        print 'adrian'
                         if movx < 0:
                                 rand = 4
                                 self.move(mapa, mutex, 4)
@@ -171,6 +176,7 @@ class RobotMensaje(Robot):
                                 rand = 3
                                 self.move(mapa, mutex, 3)
                 else:
+                        print 'tres'
                         if movy > 0:
                                 rand = 2
                                 self.move(mapa, mutex, 2)
