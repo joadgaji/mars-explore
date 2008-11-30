@@ -177,7 +177,7 @@ class Robot:
                 mutex.release()
 
 
-        def cambiarnum(self,num, mutex):
+        def cambiarnum(self, num, mutex):
                 self.cargadas = self.cargadas + num
                 self.surface = self.fontrob.render(str(self.cargadas), True, (10,37,150))
                 if self.cargadas == self.capacidad:
@@ -224,7 +224,6 @@ class Robot:
         def move(self, mapa, mutex, movactual):
                 rand = movactual
                 posmapnew = 0
-                
                 if rand == 1:
                         posmapnew = self.mapaxy - 12
                 if rand == 2:
@@ -239,7 +238,7 @@ class Robot:
                                 posmapnew = self.mapaxy
 
                 self.movanterior = rand
-                mutex.acquire()        
+                mutex.acquire()
                 if posmapnew >= 0  and posmapnew < 120:
                         if not(mapa.has_key(posmapnew)):
                                 mapa[posmapnew] = self
@@ -251,12 +250,13 @@ class Robot:
                 else:
                         rand = 5
                         self.obstaculo = True
+                        
                 mutex.release()
                 self.movimiento = rand
                 for i in range(self.frame):
+                        
                         self.movimientos()
                         pygame.time.delay(25)
-
                 return rand
 
 
