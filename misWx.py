@@ -93,7 +93,7 @@ class MyFrame(wx.Frame):
             
 
            ## try:
-                 maingrafico(1,150, [1,2,3,4], 4,'Reactivos', 1)
+                 maingrafico(2,150, [1,2,3,4,5], 4,'Negociacion', 0)
                ## maingrafico(int(self.agentes.GetValue()),int(self.esmeraldas.GetValue()), orden, int(self.obs.GetValue()),self.tipoCom.GetValue())
               ##   return [int(self.agentes.GetValue()),int(self.esmeraldas.GetValue()), orden, int(self.obs.GetValue())]
             ##except:
