@@ -74,7 +74,7 @@ class RobotCargador(Robot, RobotMensaje):
                         break
                 if a == 4:
                     
-                    if self.cargaesme(mapa, mutex):
+                    if self.cargaesme(mapa, mutex, ""):
                         
                         break
                 if a == 5:
@@ -127,17 +127,5 @@ class RobotCargador(Robot, RobotMensaje):
         else:
             return False
 
-
-    def cargaesme(self, mapa, mutex):
-        cargue = False
-        if self.cargadas < self.capacidad:
-                h = self.hayAlgo(mapa, mutex, "esmeralda", "buscar")
-                while h != -1:
-                        if self.cargadas < self.capacidad:
-                                cargue = True
-                                self.carga(h, mapa, mutex)
-                        if not(mapa.has_key(h)) or self.cargadas == self.capacidad:
-                                h = -1
-        return cargue
 
 
