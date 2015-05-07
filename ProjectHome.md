@@ -1,0 +1,1 @@
+Proyecto que simula la exploración y recolección de piedras radioactivas mediante unos robots. Dicho proyecto tiene como objetivo aplicar los conocimientos de inteligencia artificial y será desarrollado bajo el lenguaje de programación python
